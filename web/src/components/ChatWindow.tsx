@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { MessageSquarePlus, Send, Trash2 } from 'lucide-react'
 
+import { useT } from '../i18n'
 import type { ModelConfig } from '../lib/catalog'
 import { MODEL_CATALOG } from '../lib/catalog'
 import { useAiModelStore } from '../stores/aiModel'
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export function ChatWindow({ model, onShowInfo, onEditModel }: Props) {
+  const t = useT()
   const messages = useAiModelStore((s) => s.conversations[model.id] ?? [])
   const isStreaming = useAiModelStore((s) => s.streaming.has(model.id))
   const sendToModel = useAiModelStore((s) => s.sendToModel)
@@ -105,27 +107,27 @@ export function ChatWindow({ model, onShowInfo, onEditModel }: Props) {
             type="button"
             className="block max-w-full cursor-pointer truncate font-mono text-[12.5px] font-bold"
             style={{ color: model.color }}
-            title="点击查看模型介绍"
+            title={t.chat.showInfo}
             onClick={(e) => onShowInfo(model.id, e.currentTarget)}
           >
             {model.label}
           </button>
           <div className="flex min-w-0 items-center font-mono text-[10px] text-fg-faint">
-            <span className="shrink-0 whitespace-pre">{catalog.label} · </span>
+            <span className="shrink-0 whitespace-pre">{t.providers[model.provider].label} · </span>
             <VersionSwitcher model={model} disabled={isStreaming} onEdit={() => onEditModel(model)} />
           </div>
         </div>
 
         <div
           className={`h-[6px] w-[6px] shrink-0 rounded-full transition-all duration-150 ${statusClass}`}
-          title={isStreaming ? '正在生成…' : messages.length > 0 ? '已就绪' : '等待输入'}
+          title={isStreaming ? t.chat.generating : messages.length > 0 ? t.chat.ready : t.chat.waiting}
         />
 
         <button
           type="button"
           className="flex h-6 w-6 items-center justify-center rounded-sm text-fg-faint transition-colors hover:bg-surface hover:text-accent"
           onClick={() => newConversation(model.id)}
-          title="新开对话"
+          title={t.chat.newConversation}
         >
           <MessageSquarePlus className="h-[13px] w-[13px]" />
         </button>
@@ -133,7 +135,7 @@ export function ChatWindow({ model, onShowInfo, onEditModel }: Props) {
           type="button"
           className="flex h-6 w-6 items-center justify-center rounded-sm text-fg-faint transition-colors hover:bg-surface hover:text-danger-fg"
           onClick={() => clearConversation(model.id)}
-          title="清空对话"
+          title={t.chat.clearConversation}
         >
           <Trash2 className="h-[13px] w-[13px]" />
         </button>
@@ -145,8 +147,8 @@ export function ChatWindow({ model, onShowInfo, onEditModel }: Props) {
             <div className="text-[36px] opacity-[0.35]" style={{ color: model.color }}>
               {catalog.icon}
             </div>
-            <div className="text-[13px] text-fg-muted">{model.label} 已就绪</div>
-            <div className="text-[11px] text-fg-faint">在底部输入框发送消息以开始对话</div>
+            <div className="text-[13px] text-fg-muted">{t.chat.readyTitle(model.label)}</div>
+            <div className="text-[11px] text-fg-faint">{t.chat.readyHint}</div>
           </div>
         ) : (
           <>
@@ -165,12 +167,12 @@ export function ChatWindow({ model, onShowInfo, onEditModel }: Props) {
 
       <div className="flex shrink-0 items-center gap-[5px] border-t border-line bg-elevated px-[9px] py-[10px] opacity-[0.55] transition-opacity duration-150 focus-within:opacity-100 hover:opacity-100">
         <span className="shrink-0 self-center whitespace-nowrap font-mono text-[10px] text-fg-faint">
-          {messages.length} 条
+          {t.chat.count(messages.length)}
         </span>
         <textarea
           ref={inputRef}
           className="max-h-20 min-h-[22px] flex-1 resize-none self-center overflow-y-auto rounded-sm border border-line bg-transparent px-[7px] py-[3px] text-[11px] leading-[1.5] text-fg-muted outline-none transition-colors placeholder:text-[10.5px] placeholder:text-fg-faint focus:border-accent focus:text-fg disabled:cursor-not-allowed disabled:opacity-40"
-          placeholder={`单独发送给 ${model.label}…`}
+          placeholder={t.chat.placeholder(model.label)}
           rows={1}
           disabled={isStreaming}
           autoComplete="off"
@@ -191,7 +193,7 @@ export function ChatWindow({ model, onShowInfo, onEditModel }: Props) {
         <button
           type="button"
           className="flex h-[22px] w-[22px] shrink-0 items-center justify-center self-center rounded-sm text-fg-faint transition-colors hover:bg-accent/10 hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
-          title="仅发送给此模型"
+          title={t.chat.sendOnly}
           disabled={isStreaming}
           onClick={submit}
         >

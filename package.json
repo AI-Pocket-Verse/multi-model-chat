@@ -15,7 +15,8 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "screenshots": "node scripts/screenshots.mjs",
+    "screenshots": "node scripts/demo-media.mjs screenshots",
+    "demo-video": "node scripts/demo-media.mjs video",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
   "devDependencies": {

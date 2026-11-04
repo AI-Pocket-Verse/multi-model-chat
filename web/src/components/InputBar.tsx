@@ -2,12 +2,11 @@ import { useRef, useState } from 'react'
 
 import { Send, VenetianMask } from 'lucide-react'
 
+import { useT } from '../i18n'
 import { useAiModelStore } from '../stores/aiModel'
 
-const IDLE_PLACEHOLDER = '输入消息，同时发送给所有激活的模型... (Enter 发送 · Shift+Enter 换行)'
-const BUSY_PLACEHOLDER = '等待所有模型响应完成后才能发送下一条消息...'
-
 export function InputBar() {
+  const t = useT()
   const persona = useAiModelStore((s) => s.persona)
   const pendingCount = useAiModelStore((s) => s.pendingCount)
   const sendBroadcast = useAiModelStore((s) => s.sendBroadcast)
@@ -30,7 +29,7 @@ export function InputBar() {
       {personaChip && (
         <div
           className="flex shrink-0 items-center gap-1 rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-accent"
-          title="当前人设已激活"
+          title={t.input.personaActive}
         >
           <VenetianMask className="h-[9px] w-[9px]" />
           <span className="max-w-[110px] truncate font-mono text-[10px]">
@@ -43,7 +42,7 @@ export function InputBar() {
         <textarea
           ref={inputRef}
           className="max-h-[100px] flex-1 resize-none bg-transparent text-[13px] leading-[1.6] text-fg outline-none placeholder:text-fg-faint"
-          placeholder={locked ? BUSY_PLACEHOLDER : IDLE_PLACEHOLDER}
+          placeholder={locked ? t.input.busy : t.input.idle}
           rows={1}
           autoComplete="off"
           spellCheck={false}
@@ -68,7 +67,7 @@ export function InputBar() {
 
       <button
         type="button"
-        title="发送 (Enter)"
+        title={t.input.send}
         disabled={locked}
         onClick={submit}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-fg shadow-md transition-all hover:bg-accent/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"

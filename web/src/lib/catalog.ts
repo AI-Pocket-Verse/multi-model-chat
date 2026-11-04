@@ -79,6 +79,63 @@ export const MODEL_INFO: Record<string, string> = {
     '豆包 Seedream 文生图模型，擅长中文语义理解、海报排版和写实风格生成，适合品牌宣传图、电商物料与创意视觉草图。',
 }
 
+/** MODEL_INFO 的英文版，键与 MODEL_INFO 一一对应 */
+export const MODEL_INFO_EN: Record<string, string> = {
+  'doubao-seed-2-0-pro-260215':
+    'Doubao Seed 2.0 flagship (released Feb 2026). Native deep reasoning, full multimodal understanding (text, images, video), 32K context and reliable agent tool calling. Positioned against GPT-5.2 and Gemini 3 Pro for complex reasoning and enterprise tasks.',
+  'doubao-seed-2-0-lite-260215':
+    'Doubao Seed 2.0 balanced edition. Stronger overall than Doubao 1.8, balancing reasoning quality and cost, with multimodal input. Suited to medium-complexity chat, content generation and everyday business tasks.',
+  'doubao-seed-2-0-mini-260215':
+    'Doubao Seed 2.0 lightweight edition. 256K context, four adjustable thinking levels (minimal → high), very low latency and high concurrency at about 1/10 the cost of its class. Built for high-frequency, cost-sensitive production use.',
+  'doubao-1-5-pro-32k-250115':
+    'Doubao 1.5 Pro flagship with a 32K context window. Strong at code generation, logical reasoning and document processing, cost-effective and well proven. Suited to enterprise text processing, RAG Q&A and long-document analysis.',
+  'qwen3.5-plus':
+    'Qwen 3.5 open-weight flagship (released Feb 2026). 397B total parameters with only 17B active (sparse MoE), 1M context, 201 languages and native multimodality at ¥0.8 per million tokens; overall performance above Gemini 3 Pro.',
+  'qwen3.5-flash':
+    'Qwen 3.5 fast edition. Light and quick, suited to latency-critical real-time chat, summarization and classification/extraction, with solid language understanding and generation at low cost.',
+  'qwen3-max':
+    'Qwen flagship (released Sep 2025). Over 1 trillion parameters, ahead of GPT-5 and Claude Opus 4 on the LMArena text leaderboard, 1M context, 69.6 on SWE-Bench and leading agent tool calling. Built for the hardest tasks.',
+  'qwen3-omni-flash':
+    'Qwen omni-modal fast edition. Accepts text, image, audio and video, streams text and natural speech together, and the system prompt can finely control persona and speaking style. Suited to voice interaction and multimodal support.',
+  'qwen-plus-character':
+    'Tongyi Xingchen role-play model. Compared with general Qwen models it is tuned for persona fidelity, keeping conversations going and empathetic listening, with 32K context. Suited to virtual companions, game NPCs, IP characters and in-car voice assistants.',
+  'qwen-image-2.0-pro':
+    'Qwen text-to-image flagship. Generates high-quality images straight from Chinese prompts and excels at posters, illustrations, character designs and realistic scenes. Suited to marketing visuals and creative design.',
+  'deepseek-chat':
+    'DeepSeek-V3.2 in non-thinking mode (128K context). DeepSeek’s latest general flagship with multi-turn chat, JSON output, tool calls and context disk caching; strong at coding, math, reasoning and writing in Chinese and English.',
+  'deepseek-reasoner':
+    'DeepSeek-V3.2 in thinking mode (128K context). Same base model as deepseek-chat with chain-of-thought reasoning shown automatically; clearly better at math competitions, debugging and multi-step logic.',
+  'glm-5':
+    'Zhipu’s flagship base model built for agentic engineering. 744B parameters (40B active), 200K context, 77.8 on SWE-Bench (best among open models) and state-of-the-art agent ability, close to Claude Opus 4.5 in practice. Suited to complex engineering and long-horizon tasks.',
+  'glm-4.7':
+    'Zhipu flagship with 200K context and 128K output. Agentic coding on par with Claude Sonnet 4.5, 73.8% on SWE-Bench (top open model), 16:9 slide fit up from 52% to 91%, with better front-end taste and immersive writing.',
+  'glm-4.7-flashx':
+    'Light, fast edition of GLM-4.7 with 200K context and 128K output. Keeps the flagship’s agentic coding and tool calling while being much faster and cheaper, for high-concurrency and latency-sensitive production.',
+  'glm-4.6v':
+    'Zhipu flagship vision model (106B). 128K context, native image/video/file/text input, function calls that act on visual content and state-of-the-art vision for its size. Suited to document parsing, video Q&A and multimodal agents.',
+  'glm-image':
+    'Zhipu text-to-image model. Handles complex Chinese prompts, stylized illustrations and realistic posters; suited to character concepts, brand key visuals and social media images.',
+  'kimi-k2.5':
+    'Moonshot AI’s latest flagship with multimodal understanding and deep thinking on by default. Strong at complex reasoning, coding and long-document analysis; OpenAI-compatible with up to 128K context.',
+  'MiniMax-M2.7':
+    'MiniMax’s latest flagship: 204K context, about 60 tokens/s output, 56.22% on SWE-Pro, end-to-end project delivery (55.6% on VIBE-Pro) and the top open-model ELO for office work. Strong at complex engineering, agent workflows and Office documents.',
+  'MiniMax-M2.5':
+    'MiniMax flagship performance model: 204K context, about 60 tokens/s output. Balances top performance with great value and shines in coding, tool calling, search and office productivity for medium-to-heavy workloads.',
+  'M2-her':
+    'MiniMax text model tuned for conversation, with 64K context. Supports rich role settings (system / user_system / group), multi-turn history management and learning from example dialogues. Suited to role-play, virtual assistants and immersive entertainment.',
+  'image-01':
+    'MiniMax text-to-image model balancing speed and detail; suited to character art, product shots, covers and concept illustrations.',
+  'doubao-seedream-4-5-250828':
+    'Doubao Seedream text-to-image model. Strong Chinese prompt understanding, poster layout and realistic styles; suited to brand promos, e-commerce assets and creative drafts.',
+  'doubao-seedream-4-5-251128':
+    'Doubao Seedream text-to-image model. Strong Chinese prompt understanding, poster layout and realistic styles; suited to brand promos, e-commerce assets and creative drafts.',
+}
+
+/** 按语言取模型介绍；英文缺失时回落到中文，都没有返回空串 */
+export function modelInfo(version: string, lang: 'zh' | 'en'): string {
+  return (lang === 'en' ? MODEL_INFO_EN[version] : undefined) ?? MODEL_INFO[version] ?? ''
+}
+
 /** 老模型 ID → 新模型 ID 的迁移映射（loadState 时套用） */
 export const LEGACY_MODEL_VERSION_MAP: Record<string, string> = {
   'doubao-seedream-4-5-250828': 'doubao-seedream-4-5-251128',
@@ -93,17 +150,15 @@ export const IMAGE_MODEL_PATTERNS: Partial<Record<ProviderKey, RegExp[]>> = {
   custom: [/^(gpt-image|dall-e)/i],
 }
 
+/** 供应商的展示名与简介随语言变化，在 i18n 的 providers 段 */
 export interface CatalogEntry {
-  label: string
   color: string
   icon: string
   versions: string[]
-  info: string
 }
 
 export const MODEL_CATALOG: Record<ProviderKey, CatalogEntry> = {
   volcengine: {
-    label: '火山方舟 · 豆包',
     color: '#1a56db',
     icon: '⬢',
     versions: [
@@ -115,10 +170,8 @@ export const MODEL_CATALOG: Record<ProviderKey, CatalogEntry> = {
       'doubao-seed-1-8-251228',
       'doubao-seed-1-6-250615',
     ],
-    info: '字节跳动火山方舟平台，豆包系列大模型。模型 ID 也支持控制台推理接入点格式 ep-xxx-xxx。',
   },
   qwen: {
-    label: '阿里云百炼 · 千问',
     color: '#ff6a00',
     icon: '🔶',
     versions: [
@@ -129,24 +182,18 @@ export const MODEL_CATALOG: Record<ProviderKey, CatalogEntry> = {
       'qwen-plus-character',
       'qwen-image-2.0-pro',
     ],
-    info: '阿里云百炼平台，通义千问系列大模型。使用 OpenAI 兼容接口调用。',
   },
   deepseek: {
-    label: 'DeepSeek',
     color: '#4d6bfe',
     icon: '🐋',
     versions: ['deepseek-chat', 'deepseek-reasoner'],
-    info: 'DeepSeek 开放平台，V3.2 128K 上下文，支持思考/非思考双模式、Tool Calls 与上下文缓存。',
   },
   zhipu: {
-    label: '智谱 AI · GLM',
     color: '#06b6d4',
     icon: '🧠',
     versions: ['glm-5', 'glm-4.7', 'glm-4.7-flashx', 'glm-4.6v', 'glm-image'],
-    info: '智谱 AI 开放平台，GLM 系列旗舰大模型。兼容 OpenAI 接口，支持流式输出与深度思考模式。',
   },
   kimi: {
-    label: 'Moonshot AI · Kimi',
     color: '#6366f1',
     icon: '🌙',
     versions: [
@@ -156,10 +203,8 @@ export const MODEL_CATALOG: Record<ProviderKey, CatalogEntry> = {
       'moonshot-v1-32k',
       'moonshot-v1-128k',
     ],
-    info: 'Moonshot AI 开放平台，Kimi 系列大模型。兼容 OpenAI 接口，支持流式输出，最长 128K 上下文。',
   },
   minimax: {
-    label: 'MiniMax',
     color: '#10b981',
     icon: '⚡',
     versions: [
@@ -171,15 +216,12 @@ export const MODEL_CATALOG: Record<ProviderKey, CatalogEntry> = {
       'M2-her',
       'image-01',
     ],
-    info: 'MiniMax 开放平台，M2 系列大模型。兼容 OpenAI 接口，最长 204K 上下文，支持流式输出与复杂 Agent 工作流。',
   },
   custom: {
-    label: 'OpenAI 兼容 · 自定义',
     color: '#64748b',
     icon: '◎',
     // 只是输入补全建议：自定义接口的模型名由对方服务决定
     versions: ['gpt-4o-mini', 'gpt-4o', 'gpt-image-1', 'llama3.2', 'qwen2.5'],
-    info: '任意 OpenAI 兼容接口：OpenAI、OpenRouter、Ollama、vLLM、LM Studio 等。Base URL 留空时使用服务端 CUSTOM_BASE_URL；gpt-image / dall-e 模型可直接生图。',
   },
 }
 

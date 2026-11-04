@@ -8,6 +8,7 @@ import { ModelInfoPopover } from '../components/ModelInfoPopover'
 import { ModelListSection } from '../components/ModelListSection'
 import { PersonaSection } from '../components/PersonaSection'
 import { SettingsDialog } from '../components/SettingsDialog'
+import { useT } from '../i18n'
 import type { ModelConfig } from '../lib/catalog'
 import { useAiModelStore } from '../stores/aiModel'
 
@@ -16,6 +17,7 @@ import { useAiModelStore } from '../stores/aiModel'
  * 整体高度由 index.css 里 html / body / #root 的 100% 高度给足，这里各区独立滚动、页面本身不滚。
  */
 export function AiModelPage() {
+  const t = useT()
   const init = useAiModelStore((s) => s.init)
   const hydrated = useAiModelStore((s) => s.hydrated)
   const models = useAiModelStore((s) => s.models)
@@ -66,7 +68,7 @@ export function AiModelPage() {
           <ChatGrid onAddModel={() => setDialogOpen(true)} onShowInfo={showInfo} onEditModel={editModel} />
         ) : (
           <section className="flex flex-1 items-center justify-center bg-surface text-[12px] text-fg-faint">
-            正在载入会话…
+            {t.app.loading}
           </section>
         )}
       </div>

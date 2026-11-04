@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 
 import { Check, ChevronDown, Pencil } from 'lucide-react'
 
+import { useT } from '../i18n'
 import type { ModelConfig } from '../lib/catalog'
 import { MODEL_CATALOG } from '../lib/catalog'
 import { isImageGenerationModel } from '../lib/imageIntent'
@@ -20,6 +21,7 @@ interface Props {
  * 浮层 portal 到 body（窗口有 overflow:hidden），Esc 与点外部可关。
  */
 export function VersionSwitcher({ model, disabled = false, onEdit }: Props) {
+  const t = useT()
   const switchModelVersion = useAiModelStore((s) => s.switchModelVersion)
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
@@ -71,7 +73,7 @@ export function VersionSwitcher({ model, disabled = false, onEdit }: Props) {
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
-        title={disabled ? '响应中，结束后可切换版本' : '切换模型版本'}
+        title={disabled ? t.version.busy : t.version.switch}
         onClick={() => {
           setPos(null)
           setOpen((v) => !v)
@@ -109,7 +111,7 @@ export function VersionSwitcher({ model, disabled = false, onEdit }: Props) {
                   <span className="min-w-0 flex-1 truncate">{v}</span>
                   {isImageGenerationModel({ provider: model.provider, version: v }) && (
                     <span className="shrink-0 rounded-sm border border-accent/30 px-1 font-sans text-[9px] text-accent">
-                      生图
+                      {t.version.imageBadge}
                     </span>
                   )}
                   {selected && <Check className="h-3.5 w-3.5 shrink-0" />}
@@ -126,7 +128,7 @@ export function VersionSwitcher({ model, disabled = false, onEdit }: Props) {
               className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11.5px] text-fg-muted transition-colors hover:bg-surface hover:text-accent"
             >
               <Pencil className="h-3 w-3" />
-              自定义模型 ID / 供应商…
+              {t.version.custom}
             </button>
           </div>,
           document.body,

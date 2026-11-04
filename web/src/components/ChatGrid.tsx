@@ -1,5 +1,6 @@
 import { Bot, Plus } from 'lucide-react'
 
+import { useT } from '../i18n'
 import type { LayoutMode, ModelConfig } from '../lib/catalog'
 import { selectRenderableModels, useAiModelStore } from '../stores/aiModel'
 import { ChatWindow } from './ChatWindow'
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function ChatGrid({ onAddModel, onShowInfo, onEditModel }: Props) {
+  const t = useT()
   const models = useAiModelStore(selectRenderableModels)
   const layoutMode = useAiModelStore((s) => s.layoutMode)
   const imageViewOnly = useAiModelStore((s) => s.imageViewOnly)
@@ -39,12 +41,10 @@ export function ChatGrid({ onAddModel, onShowInfo, onEditModel }: Props) {
             <Bot className="h-11 w-11" />
           </div>
           <div className="text-[15px] text-fg-muted">
-            {imageViewOnly ? '当前没有可展示的生图模型窗口' : '还没有激活的模型'}
+            {imageViewOnly ? t.grid.emptyImage : t.grid.emptyAll}
           </div>
           <div className="max-w-[320px] text-[12px] text-fg-faint">
-            {imageViewOnly
-              ? '请先激活生图模型，或关闭右上角「仅看生图窗口」开关'
-              : '在左侧面板中开启模型开关，或点击「添加模型」配置新的 AI 服务'}
+            {imageViewOnly ? t.grid.emptyImageHint : t.grid.emptyAllHint}
           </div>
           <button
             type="button"
@@ -52,7 +52,7 @@ export function ChatGrid({ onAddModel, onShowInfo, onEditModel }: Props) {
             className="mt-3 flex items-center gap-1.5 rounded-md border border-accent/25 bg-accent/10 px-3 py-2 text-[12px] font-semibold text-accent transition-colors hover:bg-accent/15"
           >
             <Plus className="h-3.5 w-3.5" />
-            添加第一个模型
+            {t.grid.addFirst}
           </button>
         </div>
       </section>

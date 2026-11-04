@@ -4,9 +4,11 @@ English | [简体中文](README-CN.md)
 
 Send one prompt to many LLMs at once and compare their answers side by side, each window streaming on its own. Works for text-to-image models too.
 
-![Six models answering the same prompt side by side](docs/images/hero.png)
+![Demo: one prompt to three models, switching versions, image comparison and settings](docs/images/en/demo.gif)
 
-> The app UI is in Simplified Chinese. Screenshots in this README use mocked demo responses (see [Regenerating screenshots](#regenerating-screenshots)).
+▶ [Watch the full-quality demo video (MP4, 40 s)](docs/media/demo-en.mp4)
+
+> The UI is available in English and Simplified Chinese. It follows your browser language, and you can switch it from the avatar menu. Screenshots and the demo use mocked responses (see [Regenerating screenshots and the demo](#regenerating-screenshots-and-the-demo)).
 
 ## Features
 
@@ -15,17 +17,19 @@ Send one prompt to many LLMs at once and compare their answers side by side, eac
 - **Switch models at any time**: pick another version from the dropdown in a window's title bar, or edit any model's provider, model ID, name, key or Base URL in **Settings**. Conversation history is kept when you switch.
 - **Text-to-image comparison**: qwen-image, glm-image / CogView, doubao-seedream, MiniMax image-01 and OpenAI gpt-image / dall-e render side by side. When a message asks for an image, it goes to the image API automatically.
 - **Sensible defaults**: on first launch only models whose provider has a server-side key are activated, so configuring one key doesn't leave you with a screen full of errors.
-- **Flexible setup**: a shared persona (system prompt), per-model API keys, 5 grid layouts and 3 color skins.
+- **Flexible setup**: a shared persona (system prompt), per-model API keys, 5 grid layouts, 3 color skins, and an English / Chinese UI.
 - **Data stays in your browser**: conversations are stored in IndexedDB, and the model list and settings in localStorage. The server stores nothing.
 - **Keys stay on the server**: provider keys live only in the api's environment, and the browser never sees them.
 
+![Six models answering the same prompt side by side](docs/images/en/hero.png)
+
 | Text-to-image comparison | Settings |
 | --- | --- |
-| ![Four image models drawing the same prompt](docs/images/image-compare.png) | ![Settings: server key status and model list](docs/images/settings.png) |
+| ![Four image models drawing the same prompt](docs/images/en/image-compare.png) | ![Settings: server key status and model list](docs/images/en/settings.png) |
 
 | Switch a window's model version | Add an OpenAI-compatible model (e.g. Ollama) |
 | --- | --- |
-| ![Version dropdown in a chat window](docs/images/version-switcher.png) | ![Add model dialog with a custom Base URL](docs/images/add-custom-model.png) |
+| ![Version dropdown in a chat window](docs/images/en/version-switcher.png) | ![Add model dialog with a custom Base URL](docs/images/en/add-custom-model.png) |
 
 ## Quick start
 
@@ -58,7 +62,7 @@ Open <http://localhost:4060>. One image serves both the web app and the api. The
 
 ## Using OpenAI-compatible endpoints
 
-Choose the **OpenAI 兼容 · 自定义** (OpenAI-compatible) provider when you add or edit a model:
+Choose the **OpenAI-compatible · Custom** provider when you add or edit a model:
 
 | Service | Base URL | API key |
 | --- | --- | --- |
@@ -154,7 +158,8 @@ If you run local mode behind nginx for yourself, add your domain to `ALLOWED_HOS
 | `pnpm build` | Builds api (`api/dist`) and web (`web/dist`) |
 | `pnpm typecheck` | Type-checks every package |
 | `pnpm test` | Runs all unit tests |
-| `pnpm screenshots` | Regenerates the README screenshots |
+| `pnpm screenshots` | Regenerates the README screenshots (English and Chinese) |
+| `pnpm demo-video` | Re-records the demo GIF and MP4 (needs ffmpeg) |
 
 ```
 api/        Fastify api: /api/chat (streaming proxy), /api/image, /api/providers
@@ -162,14 +167,19 @@ web/        React front end
 shared/     Request / response types shared by api and web
 packages/   Small shared packages (login clients, HTTP client, skin tokens, Tailwind preset…)
 deploy/     systemd / nginx templates
-scripts/    Maintenance scripts (screenshots)
+scripts/    Maintenance scripts (screenshots and demo video)
 ```
 
-To add a provider, update `ProviderKey` in `shared`, `api/src/env.ts`, `PROVIDER_API` in `api/src/providers.ts`, `PROVIDER_KEY_ENV` in `web/src/lib/errors.ts`, the catalog in `web/src/lib/catalog.ts`, and the configuration table above.
+To add a provider, update `ProviderKey` in `shared`, `api/src/env.ts`, `PROVIDER_API` in `api/src/providers.ts`, `PROVIDER_KEY_ENV` in `web/src/lib/errors.ts`, the catalog in `web/src/lib/catalog.ts`, the `providers` entries in `web/src/i18n/zh.ts` and `en.ts`, and the configuration table above.
 
-### Regenerating screenshots
+UI text lives in `web/src/i18n/zh.ts`, the source of truth, and `web/src/i18n/en.ts`, which is type-checked against it. A missing translation fails the build.
 
-`pnpm screenshots` starts Vite on port 5199 and drives the locally installed Google Chrome with Playwright. It intercepts every `/api/*` call with canned demo data, so it needs no keys and makes no network calls. The pictures in the image comparison are SVGs generated by the script. To use Playwright's bundled Chromium instead, run `pnpm exec playwright install chromium` and set `PW_CHANNEL=` (empty).
+### Regenerating screenshots and the demo
+
+`pnpm screenshots` and `pnpm demo-video` run [`scripts/demo-media.mjs`](scripts/demo-media.mjs). The script starts a small mock api that streams canned replies and runs Vite on port 5199. It then drives the locally installed Google Chrome with Playwright, once per language. It needs no keys and never calls a model provider. The pictures in the image comparison are SVGs generated by the script.
+
+- The video needs `ffmpeg` on your PATH and Playwright's recorder (`pnpm exec playwright install ffmpeg`).
+- To use Playwright's bundled Chromium instead of Chrome, run `pnpm exec playwright install chromium` and set `PW_CHANNEL=` (empty).
 
 ## License
 

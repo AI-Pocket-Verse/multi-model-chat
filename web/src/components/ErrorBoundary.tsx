@@ -1,5 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 
+import { t } from '../i18n'
+
 /**
  * 页面级错误边界。React 默认在渲染期抛异常时卸载整棵树，页面变成纯白且没有任何提示；
  * 这里兜住后给出错误信息和「重试」。
@@ -29,12 +31,13 @@ export class ErrorBoundary extends Component<Props, State> {
   override render() {
     const { error } = this.state
     if (!error) return this.props.children
+    const m = t().errorBoundary
 
     return (
       <div className="flex h-full min-h-0 items-center justify-center p-6">
         <div className="w-full max-w-md rounded-xl border border-line bg-elevated p-5 text-center shadow-sm">
-          <p className="text-base font-semibold text-fg">页面出错了</p>
-          <p className="mt-1.5 text-sm text-fg-muted">可以点「重试」恢复；反复出现的话，请带上下面这行信息反馈。</p>
+          <p className="text-base font-semibold text-fg">{m.title}</p>
+          <p className="mt-1.5 text-sm text-fg-muted">{m.hint}</p>
           <p className="mt-3 break-all rounded-md bg-surface px-3 py-2 text-left font-mono text-xs text-fg-faint">
             {error.name}: {error.message}
           </p>
@@ -43,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
             onClick={() => this.setState({ error: null })}
             className="mt-4 rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-fg transition-colors hover:bg-accent/90"
           >
-            重试
+            {m.retry}
           </button>
         </div>
       </div>

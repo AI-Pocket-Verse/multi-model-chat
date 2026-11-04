@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Check, Pencil, VenetianMask } from 'lucide-react'
 
+import { useT } from '../i18n'
 import { useAiModelStore } from '../stores/aiModel'
-
-const PLACEHOLDER = '点击「修改」设置 AI 的角色与行为准则...'
 
 /**
  * 人设 / 系统提示词 —— 「只读 ↔ 编辑」双态：
  * 编辑期间的输入不进 store，**点「完成」才真正保存**。
  */
 export function PersonaSection() {
+  const t = useT()
   const persona = useAiModelStore((s) => s.persona)
   const setPersona = useAiModelStore((s) => s.setPersona)
 
@@ -41,7 +41,7 @@ export function PersonaSection() {
       <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.08em] text-fg-faint">
         <span className="flex items-center gap-1.5">
           <VenetianMask className="h-3 w-3" />
-          人设 / 系统提示词
+          {t.persona.title}
         </span>
         <button
           type="button"
@@ -53,7 +53,7 @@ export function PersonaSection() {
           }`}
         >
           {editing ? <Check className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
-          {editing ? '完成' : '修改'}
+          {editing ? t.persona.done : t.persona.edit}
         </button>
       </div>
 
@@ -62,15 +62,13 @@ export function PersonaSection() {
           <textarea
             ref={textareaRef}
             className="min-h-0 flex-1 resize-none rounded-md border border-line bg-bg p-2.5 text-[11.5px] leading-[1.7] text-fg outline-none transition-colors placeholder:text-fg-faint focus:border-accent"
-            placeholder={
-              '设置 AI 的角色与行为准则，将同步应用到所有激活模型...\n\n例如：你是一位经验丰富的全栈工程师，请用简洁专业的方式回答问题，并在适当时给出代码示例。'
-            }
+            placeholder={t.persona.editPlaceholder}
             maxLength={2000}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
           />
           <div className="mt-1.5 flex items-center justify-between text-[10px] text-fg-faint">
-            <span>应用于所有激活模型</span>
+            <span>{t.persona.appliesToAll}</span>
             <span className="font-mono">{draft.length} / 2000</span>
           </div>
         </div>
@@ -80,7 +78,7 @@ export function PersonaSection() {
             persona ? 'text-fg-muted' : 'text-fg-faint'
           }`}
         >
-          {persona || PLACEHOLDER}
+          {persona || t.persona.placeholder}
         </div>
       )}
     </div>

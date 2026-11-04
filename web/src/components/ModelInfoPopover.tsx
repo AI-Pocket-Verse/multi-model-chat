@@ -4,7 +4,8 @@ import { createPortal } from 'react-dom'
 import { Tag, X } from 'lucide-react'
 
 import type { ModelConfig } from '../lib/catalog'
-import { MODEL_CATALOG, MODEL_INFO } from '../lib/catalog'
+import { useLangStore, useT } from '../i18n'
+import { MODEL_CATALOG, modelInfo } from '../lib/catalog'
 
 interface Props {
   model: ModelConfig
@@ -20,6 +21,8 @@ interface Props {
  * portal 到 body，避免被聊天窗口的 overflow:hidden 裁掉。
  */
 export function ModelInfoPopover({ model, anchor, onClose }: Props) {
+  const t = useT()
+  const lang = useLangStore((s) => s.lang)
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
 
@@ -63,7 +66,7 @@ export function ModelInfoPopover({ model, anchor, onClose }: Props) {
   }, [onClose])
 
   const catalog = MODEL_CATALOG[model.provider]
-  const info = MODEL_INFO[model.version] || '暂无介绍信息。'
+  const info = modelInfo(model.version, lang) || t.info.none
 
   return createPortal(
     <div
@@ -83,12 +86,12 @@ export function ModelInfoPopover({ model, anchor, onClose }: Props) {
           <div className="truncate font-mono text-[13px] font-bold" style={{ color: model.color }}>
             {model.label}
           </div>
-          <div className="truncate text-[10.5px] text-fg-faint">{catalog.label}</div>
+          <div className="truncate text-[10.5px] text-fg-faint">{t.providers[model.provider].label}</div>
         </div>
         <button
           type="button"
           onClick={onClose}
-          title="关闭"
+          title={t.info.close}
           className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-fg-faint transition-colors hover:bg-surface hover:text-fg"
         >
           <X className="h-3.5 w-3.5" />

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 
 import type { LayoutMode } from '../lib/catalog'
+import { useT } from '../i18n'
 import { useSkinMenuItems } from '../lib/skin'
 import { useAiModelStore } from '../stores/aiModel'
 
@@ -48,6 +49,7 @@ function ProductIcon() {
 
 /** 身份 ID 行：单行截断、点击复制、1.5s 反馈。 */
 function CopyId({ label, value }: { label: string; value?: string | null }) {
+  const t = useT()
   const [copied, setCopied] = useState(false)
   if (!value) return null
 
@@ -67,10 +69,10 @@ function CopyId({ label, value }: { label: string; value?: string | null }) {
     <button
       type="button"
       onClick={copy}
-      title={`${label}: ${value}（点击复制）`}
+      title={t.header.copyIdTitle(label, value)}
       className="block w-full truncate text-left font-mono text-[11px] leading-relaxed text-fg-faint transition-colors hover:text-fg-muted"
     >
-      {label}: {copied ? '已复制' : value}
+      {label}: {copied ? t.header.copied : value}
     </button>
   )
 }
@@ -85,6 +87,7 @@ interface Props {
  * 产品顶栏 —— 左 icon + 名称，右操作按钮 + 用户头像。
  */
 export function AppHeader({ onToggleSidebar, onAddModel, onOpenSettings }: Props) {
+  const t = useT()
   const { user, isLocal } = useAuth()
   const skinItems = useSkinMenuItems()
   const activeCount = useAiModelStore((s) => s.activeModels.size)
@@ -100,7 +103,7 @@ export function AppHeader({ onToggleSidebar, onAddModel, onOpenSettings }: Props
       <button
         type="button"
         onClick={onToggleSidebar}
-        title="切换侧栏"
+        title={t.header.toggleSidebar}
         className="flex h-8 w-8 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-surface hover:text-accent"
       >
         <Menu className="h-4 w-4" />
@@ -110,18 +113,18 @@ export function AppHeader({ onToggleSidebar, onAddModel, onOpenSettings }: Props
         <span className="text-accent">
           <ProductIcon />
         </span>
-        <span className="text-[15px] font-bold text-fg">多模型并行对话</span>
+        <span className="text-[15px] font-bold text-fg">{t.app.title}</span>
       </div>
 
       <div className="flex-1" />
 
       <div className="flex items-center gap-1.5 text-[11px] text-fg-muted">
         <Layers className="h-[11px] w-[11px]" />
-        <span>已激活</span>
+        <span>{t.header.activePrefix}</span>
         <span className="rounded-md bg-accent/10 px-1.5 py-0.5 font-mono text-[11px] font-bold text-accent">
           {activeCount}
         </span>
-        <span>个模型</span>
+        <span>{t.header.activeSuffix}</span>
       </div>
 
       <button
@@ -130,14 +133,14 @@ export function AppHeader({ onToggleSidebar, onAddModel, onOpenSettings }: Props
         className="flex items-center gap-1.5 rounded-md border border-accent/25 bg-accent/10 px-3 py-1.5 text-[11.5px] font-semibold text-accent transition-colors hover:bg-accent/15"
       >
         <Plus className="h-3.5 w-3.5" />
-        添加模型
+        {t.header.addModel}
       </button>
 
       <button
         type="button"
         onClick={toggleImageViewOnly}
         aria-pressed={imageViewOnly}
-        title={imageViewOnly ? '已开启：仅显示生图模型窗口' : '关闭：显示全部已选模型窗口'}
+        title={imageViewOnly ? t.header.imageOnlyOnTitle : t.header.imageOnlyOffTitle}
         className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[11.5px] font-semibold transition-colors ${
           imageViewOnly
             ? 'border-warning-line bg-warning-bg text-warning-fg'
@@ -145,13 +148,13 @@ export function AppHeader({ onToggleSidebar, onAddModel, onOpenSettings }: Props
         }`}
       >
         <ImageIcon className="h-3.5 w-3.5" />
-        {imageViewOnly ? '仅看生图窗口' : '显示全部窗口'}
+        {imageViewOnly ? t.header.imageOnlyOn : t.header.imageOnlyOff}
       </button>
 
       <button
         type="button"
         onClick={cycleLayout}
-        title="切换布局"
+        title={t.header.switchLayout}
         className="flex h-8 w-8 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-surface hover:text-accent"
       >
         <LayoutIcon className="h-4 w-4" />
@@ -160,7 +163,7 @@ export function AppHeader({ onToggleSidebar, onAddModel, onOpenSettings }: Props
       <button
         type="button"
         onClick={onOpenSettings}
-        title="全局设置"
+        title={t.header.settings}
         className="flex h-8 w-8 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-surface hover:text-accent"
       >
         <SlidersHorizontal className="h-4 w-4" />
@@ -168,10 +171,12 @@ export function AppHeader({ onToggleSidebar, onAddModel, onOpenSettings }: Props
 
       <div className="mx-1 h-5 w-px bg-line" />
 
-      {/* 头像菜单：飞书登录时显示 USER_ID / OPEN_ID（点击复制）；本地模式只有皮肤切换 */}
+      {/* 头像菜单：飞书登录时显示 USER_ID / OPEN_ID（点击复制）；本地模式只有皮肤与语言切换 */}
       <UserMenu
         avatarOnly
         items={skinItems}
+        labels={{ login: t.menu.login, settings: t.menu.settings, logout: t.menu.logout }}
+        displayName={isLocal ? t.menu.localUser : undefined}
         subtitle={
           user && !isLocal ? (
             <div className="space-y-0.5">

@@ -1,5 +1,6 @@
 import { Copy } from 'lucide-react'
 
+import { t as currentT, useT } from '../i18n'
 import type { ChatMessageRecord } from '../lib/catalog'
 import { renderMarkdown } from '../lib/markdown'
 import { showToast } from '../lib/toast'
@@ -14,11 +15,12 @@ function copyText(text: string) {
   if (!text) return
   navigator.clipboard
     .writeText(text)
-    .then(() => showToast('已复制'))
-    .catch(() => showToast('复制失败，请手动选择文本'))
+    .then(() => showToast(currentT().bubble.copied))
+    .catch(() => showToast(currentT().bubble.copyFailed))
 }
 
 export function MessageBubble({ message, streaming = false }: Props) {
+  const t = useT()
   const isUser = message.role === 'user'
   const images = message.images ?? []
 
@@ -51,18 +53,18 @@ export function MessageBubble({ message, streaming = false }: Props) {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="点击查看大图"
+                  title={t.bubble.viewImage}
                 >
                   <img
                     className="block aspect-square h-auto w-full object-cover"
                     src={url}
-                    alt="AI 生成图片"
+                    alt={t.bubble.imageAlt}
                     loading="lazy"
                   />
                 </a>
               ))}
             </div>
-            <div className="mt-2 text-[10.5px] text-fg-faint">已生成 {images.length} 张图片</div>
+            <div className="mt-2 text-[10.5px] text-fg-faint">{t.bubble.imagesGenerated(images.length)}</div>
           </>
         )}
 
@@ -70,7 +72,7 @@ export function MessageBubble({ message, streaming = false }: Props) {
           <button
             type="button"
             onClick={() => copyText(message.content)}
-            title="复制全文"
+            title={t.bubble.copyAll}
             className="absolute bottom-[5px] right-[7px] flex h-[22px] w-[22px] items-center justify-center rounded-[5px] border border-line bg-surface text-[10px] leading-none text-fg-faint opacity-0 transition-all duration-150 hover:border-accent hover:bg-nav-active-bg hover:text-accent group-hover:opacity-100"
           >
             <Copy className="h-3 w-3" />

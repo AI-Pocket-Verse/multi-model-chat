@@ -199,7 +199,7 @@ export async function generateImage(req: ImageRequest): Promise<string[]> {
   } catch (err) {
     if (err instanceof HttpError) {
       if (err.status === 422) throw new UnsupportedImageModelError()
-      const details = err.details as { message?: string; upstream?: boolean } | undefined
+      const details = err.details as { error?: string; message?: string; upstream?: boolean } | undefined
       // 同 streamChat：没有 upstream 标记的 401 是自己登录过期，不是厂商 key 问题
       if (err.status === 401 && !details?.upstream) {
         throw Object.assign(new Error('session_expired'), { status: 401, sessionExpired: true })
@@ -207,6 +207,8 @@ export async function generateImage(req: ImageRequest): Promise<string[]> {
       throw Object.assign(new Error(details?.message ?? err.message), {
         status: err.status,
         apiMessage: details?.message,
+        // 自家 api 的错误码，供界面按当前语言给出原因
+        code: details?.error,
       })
     }
     throw err

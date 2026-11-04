@@ -30,10 +30,11 @@ import {
   buildChatErrorText,
   buildImageErrorText,
   buildImageUnsupportedText,
-  STREAM_INTERRUPTED_MARK,
+  streamInterruptedMark,
 } from '../lib/errors'
 import { isImageGenerationModel, isImageGenerationPrompt } from '../lib/imageIntent'
 import { showToast } from '../lib/toast'
+import { t } from '../i18n'
 
 export type ModelListFilter = 'all' | 'image'
 
@@ -246,7 +247,7 @@ export const useAiModelStore = create<AiModelState>()(
 
           // 模型返回空内容时补一句提示，方便排查（原实现同样处理）
           if (!finalText) {
-            patchMessage(model.id, msgIdx, { content: '（模型未返回文本内容）', error: true })
+            patchMessage(model.id, msgIdx, { content: t().toast.emptyReply, error: true })
           } else {
             // 流结束再落一次完整内容，覆盖掉防抖可能漏掉的最后一帧
             const list = get().conversations[model.id] ?? []
@@ -260,7 +261,7 @@ export const useAiModelStore = create<AiModelState>()(
             (err as { timeout?: boolean }).timeout
           if (cut && partial) {
             // 已收到一部分：保留并标注不完整，而不是整条换成错误提示
-            patchMessage(model.id, msgIdx, { content: partial + STREAM_INTERRUPTED_MARK })
+            patchMessage(model.id, msgIdx, { content: partial + streamInterruptedMark() })
           } else {
             patchMessage(model.id, msgIdx, { content: buildChatErrorText(model, err), error: true })
           }
@@ -353,7 +354,7 @@ export const useAiModelStore = create<AiModelState>()(
             console.error('[multi-model-chat] 会话载入失败，将以空历史启动', err)
             ensureModels()
             set({ conversations: {}, hydrated: true })
-            showToast('本地存储不可用，历史记录本次无法加载')
+            showToast(t().toast.storageUnavailable)
             void get().loadProviders()
           }
         },
@@ -374,7 +375,7 @@ export const useAiModelStore = create<AiModelState>()(
 
         setPersona(persona) {
           set({ persona })
-          showToast(persona ? '人设已保存' : '人设已清空')
+          showToast(persona ? t().toast.personaSaved : t().toast.personaCleared)
         },
 
         toggleModel(modelId, isActive) {
@@ -408,7 +409,7 @@ export const useAiModelStore = create<AiModelState>()(
             }
           })
           void deleteConversation(modelId)
-          showToast('模型已移除')
+          showToast(t().toast.modelRemoved)
         },
 
         addModel(model) {
@@ -417,7 +418,7 @@ export const useAiModelStore = create<AiModelState>()(
             activeModels: new Set(s.activeModels).add(model.id),
             conversations: { ...s.conversations, [model.id]: [] },
           }))
-          showToast(`已添加「${model.label}」`)
+          showToast(t().toast.modelAdded(model.label))
         },
 
         updateModel(modelId, patch) {
@@ -444,7 +445,7 @@ export const useAiModelStore = create<AiModelState>()(
           const v = version.trim()
           if (!model || !v || v === model.version) return
           if (s.streaming.has(modelId)) {
-            showToast('该模型正在响应中，请稍后再切换')
+            showToast(t().toast.busySwitch)
             return
           }
           // 显示名还是旧版本的默认名时跟着换，用户自己改过的名字保留
@@ -453,7 +454,7 @@ export const useAiModelStore = create<AiModelState>()(
             version: v,
             ...(autoLabel ? { label: defaultLabelFor(model.provider, v) } : {}),
           })
-          showToast(`已切换到 ${v}，对话历史保留`)
+          showToast(t().toast.switched(v))
         },
 
         resetModels() {
@@ -473,7 +474,7 @@ export const useAiModelStore = create<AiModelState>()(
             pendingCount: 0,
             conversations,
           })
-          showToast('已恢复预置模型列表')
+          showToast(t().toast.reset)
         },
 
         setModelListFilter(filter) {
@@ -484,7 +485,7 @@ export const useAiModelStore = create<AiModelState>()(
 
         toggleImageViewOnly() {
           if (get().pendingCount > 0) {
-            showToast('模型响应中，暂时不能切换窗口视图')
+            showToast(t().toast.busyView)
             return
           }
           set((s) => ({ imageViewOnly: !s.imageViewOnly }))
@@ -494,21 +495,21 @@ export const useAiModelStore = create<AiModelState>()(
           const idx = LAYOUT_MODES.indexOf(get().layoutMode)
           const layoutMode = LAYOUT_MODES[(idx + 1) % LAYOUT_MODES.length]!
           set({ layoutMode })
-          showToast(`布局：${layoutMode === 'auto' ? '自动' : layoutMode}`)
+          showToast(t().toast.layout(layoutMode))
         },
 
         newConversation(modelId) {
           abortInflight(modelId)
           set((s) => ({ conversations: { ...s.conversations, [modelId]: [] } }))
           void saveConversation(modelId, [])
-          showToast('已开启新对话')
+          showToast(t().toast.newConversation)
         },
 
         clearConversation(modelId) {
           abortInflight(modelId)
           set((s) => ({ conversations: { ...s.conversations, [modelId]: [] } }))
           void saveConversation(modelId, [])
-          showToast('对话已清空')
+          showToast(t().toast.cleared)
         },
 
         sendBroadcast(text) {
@@ -519,7 +520,7 @@ export const useAiModelStore = create<AiModelState>()(
 
           const active = selectRenderableModels(s)
           if (active.length === 0) {
-            showToast(s.imageViewOnly ? '请先激活至少一个生图模型' : '请先在左侧面板激活至少一个模型')
+            showToast(s.imageViewOnly ? t().toast.needImageModel : t().toast.needModel)
             return
           }
 
@@ -534,7 +535,7 @@ export const useAiModelStore = create<AiModelState>()(
           const trimmed = text.trim()
           if (!model || !trimmed) return
           if (s.streaming.has(modelId)) {
-            showToast('该模型正在响应中，请稍后')
+            showToast(t().toast.busyModel)
             return
           }
           pushMessage(modelId, 'user', trimmed)

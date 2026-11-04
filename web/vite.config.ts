@@ -6,7 +6,8 @@ export default defineConfig({
   server: {
     port: 5160,
     proxy: {
-      '/api': { target: 'http://localhost:4060', changeOrigin: true },
+      // API_PROXY_TARGET 只给 scripts/demo-media.mjs 指向它自己的演示服务用
+      '/api': { target: process.env.API_PROXY_TARGET ?? 'http://localhost:4060', changeOrigin: true },
     },
   },
   resolve: {

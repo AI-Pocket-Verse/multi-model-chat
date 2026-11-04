@@ -4,9 +4,11 @@
 
 多模型并行对话：一句话同时发给多个大模型，各窗口独立流式输出，直接对比回答质量；也能并排对比文生图效果。
 
-![六个模型并排回答同一个问题](docs/images/hero.png)
+![演示：一句话发给三个模型、切换版本、文生图对比与全局设置](docs/images/zh/demo.gif)
 
-> 本文截图使用的是模拟的演示回答（见[重新生成截图](#重新生成截图)）。
+▶ [观看高清演示视频（MP4，31 秒）](docs/media/demo-zh.mp4)
+
+> 界面支持中文和英文：默认跟随浏览器语言，也可以在右上角头像菜单里切换。截图和演示视频使用的是模拟回答（见[重新生成截图与演示视频](#重新生成截图与演示视频)）。
 
 ## 功能
 
@@ -15,17 +17,19 @@
 - **随时切换模型**：在窗口标题栏的下拉里换版本，或在「全局设置」里编辑任意模型的供应商、模型 ID、显示名称、Key 和 Base URL，切换后对话历史保留。
 - **文生图对比**：qwen-image、glm-image / CogView、doubao-seedream、MiniMax image-01 和 OpenAI gpt-image / dall-e 并排出图；消息看起来是要图时自动走生图接口。
 - **开箱即用的默认值**：首次打开时只激活服务端已配 Key 的供应商的模型，只配一家也不会满屏报错。
-- **灵活配置**：统一下发人设（系统提示词）、单个模型自带 API Key、5 种网格布局、3 套皮肤。
+- **灵活配置**：统一下发人设（系统提示词）、单个模型自带 API Key、5 种网格布局、3 套皮肤、中英文界面。
 - **数据留在本地**：会话历史存在浏览器 IndexedDB，模型列表与设置存在 localStorage，服务端不落库。
 - **Key 只在服务端**：厂商 Key 只存在于 api 的环境变量里，浏览器拿不到。
 
+![六个模型并排回答同一个问题](docs/images/zh/hero.png)
+
 | 文生图对比 | 全局设置 |
 | --- | --- |
-| ![四个生图模型画同一个提示词](docs/images/image-compare.png) | ![全局设置：服务端 Key 状态与模型列表](docs/images/settings.png) |
+| ![四个生图模型画同一个提示词](docs/images/zh/image-compare.png) | ![全局设置：服务端 Key 状态与模型列表](docs/images/zh/settings.png) |
 
 | 窗口内切换模型版本 | 添加 OpenAI 兼容模型（如 Ollama） |
 | --- | --- |
-| ![聊天窗口里的版本下拉](docs/images/version-switcher.png) | ![填写自定义 Base URL 的添加模型弹窗](docs/images/add-custom-model.png) |
+| ![聊天窗口里的版本下拉](docs/images/zh/version-switcher.png) | ![填写自定义 Base URL 的添加模型弹窗](docs/images/zh/add-custom-model.png) |
 
 ## 快速开始
 
@@ -154,7 +158,8 @@ sudo ln -sf /etc/nginx/sites-available/multi-model-chat /etc/nginx/sites-enabled
 | `pnpm build` | 构建 api（`api/dist`）和 web（`web/dist`） |
 | `pnpm typecheck` | 全部包类型检查 |
 | `pnpm test` | 全部单元测试 |
-| `pnpm screenshots` | 重新生成 README 截图 |
+| `pnpm screenshots` | 重新生成 README 截图（中英文各一套） |
+| `pnpm demo-video` | 重新录制演示 GIF 和 MP4（需要 ffmpeg） |
 
 ```
 api/        Fastify 后端：/api/chat（流式转发）、/api/image、/api/providers
@@ -162,14 +167,19 @@ web/        React 前端
 shared/     api 与 web 共用的请求 / 响应类型
 packages/   共用小包（登录客户端、HTTP 客户端、皮肤 token、Tailwind 预设等）
 deploy/     systemd / nginx 模板
-scripts/    维护脚本（截图）
+scripts/    维护脚本（截图与演示视频）
 ```
 
-新增供应商时同步修改：`shared` 的 `ProviderKey`、`api/src/env.ts`、`api/src/providers.ts` 的 `PROVIDER_API`、`web/src/lib/errors.ts` 的 `PROVIDER_KEY_ENV`、`web/src/lib/catalog.ts` 的模型目录，以及上面的配置表。
+新增供应商时同步修改：`shared` 的 `ProviderKey`、`api/src/env.ts`、`api/src/providers.ts` 的 `PROVIDER_API`、`web/src/lib/errors.ts` 的 `PROVIDER_KEY_ENV`、`web/src/lib/catalog.ts` 的模型目录、`web/src/i18n/zh.ts` 与 `en.ts` 的 `providers`，以及上面的配置表。
 
-### 重新生成截图
+界面文案在 `web/src/i18n/zh.ts`（基准）和 `web/src/i18n/en.ts`，英文按中文的类型校验，漏翻会直接构建失败。
 
-`pnpm screenshots` 会在 5199 端口启动 Vite，用 Playwright 驱动本机安装的 Google Chrome。所有 `/api/*` 请求都被拦截并返回演示数据，不需要 Key，也不发任何网络请求；生图对比里的图片是脚本生成的 SVG。想改用 Playwright 自带的 Chromium，先运行 `pnpm exec playwright install chromium`，再设置 `PW_CHANNEL=`（留空）。
+### 重新生成截图与演示视频
+
+`pnpm screenshots` 和 `pnpm demo-video` 运行的是 [`scripts/demo-media.mjs`](scripts/demo-media.mjs)：脚本启动一个流式返回演示回答的模拟 api 和 5199 端口的 Vite，再用 Playwright 驱动本机安装的 Google Chrome，中英文各跑一遍。不需要 Key，也不会请求任何模型厂商；生图对比里的图片是脚本生成的 SVG。
+
+- 录视频需要 PATH 里有 `ffmpeg`，以及 Playwright 的录屏组件（`pnpm exec playwright install ffmpeg`）。
+- 想改用 Playwright 自带的 Chromium，先运行 `pnpm exec playwright install chromium`，再设置 `PW_CHANNEL=`（留空）。
 
 ## License
 

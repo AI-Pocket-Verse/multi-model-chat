@@ -14,6 +14,17 @@
       } catch (e) {
         document.documentElement.dataset.skin = 'a'
       }
+      // 首屏语言：与 web/src/i18n/index.ts 的 LANG_STORAGE_KEY / detectLang 保持一致。
+      try {
+        var lang = localStorage.getItem('multi-model-chat.lang')
+        if (lang !== 'zh' && lang !== 'en') {
+          lang = /^zh\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '') ? 'zh' : 'en'
+        }
+        if (lang === 'en') {
+          document.documentElement.lang = 'en'
+          document.title = 'Multi-Model Chat'
+        }
+      } catch (e) {}
     </script>
   </head>
   <body>

@@ -1,6 +1,6 @@
 import { Bot, Plus, X } from 'lucide-react'
 
-import { MODEL_CATALOG } from '../lib/catalog'
+import { useT } from '../i18n'
 import { isImageGenerationModel } from '../lib/imageIntent'
 import { selectVisibleModels, useAiModelStore } from '../stores/aiModel'
 
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function ModelListSection({ onAddModel, onShowInfo }: Props) {
+  const t = useT()
   const models = useAiModelStore((s) => s.models)
   const visible = useAiModelStore(selectVisibleModels)
   const activeModels = useAiModelStore((s) => s.activeModels)
@@ -23,17 +24,17 @@ export function ModelListSection({ onAddModel, onShowInfo }: Props) {
       <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.08em] text-fg-faint">
         <span className="flex items-center gap-1.5">
           <Bot className="h-3 w-3" />
-          模型列表
+          {t.modelList.title}
         </span>
         <span className="rounded-xl border border-line bg-elevated px-[7px] py-0.5 text-[9.5px] tracking-[0.04em]">
-          {filter === 'image' ? `${visible.length} / ${models.length}` : `${models.length} 个`}
+          {filter === 'image' ? `${visible.length} / ${models.length}` : t.modelList.count(models.length)}
         </span>
       </div>
 
       <div className="flex gap-1.5">
         {([
-          ['all', '全部模型'],
-          ['image', '生图模型'],
+          ['all', t.modelList.all],
+          ['image', t.modelList.image],
         ] as const).map(([key, label]) => (
           <button
             key={key}
@@ -52,9 +53,9 @@ export function ModelListSection({ onAddModel, onShowInfo }: Props) {
 
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto">
         {models.length === 0 ? (
-          <div className="p-5 text-center text-[12px] text-fg-faint">暂无模型，请点击下方按钮添加</div>
+          <div className="p-5 text-center text-[12px] text-fg-faint">{t.modelList.empty}</div>
         ) : visible.length === 0 ? (
-          <div className="p-5 text-center text-[12px] text-fg-faint">当前筛选下暂无模型</div>
+          <div className="p-5 text-center text-[12px] text-fg-faint">{t.modelList.emptyFiltered}</div>
         ) : (
           visible.map((model) => {
             const isActive = activeModels.has(model.id)
@@ -74,25 +75,25 @@ export function ModelListSection({ onAddModel, onShowInfo }: Props) {
                   <button
                     type="button"
                     className="flex max-w-full items-center gap-1 truncate text-left text-[11.5px] text-fg hover:text-accent"
-                    title="点击查看模型介绍"
+                    title={t.modelList.showInfo}
                     onClick={(e) => onShowInfo(model.id, e.currentTarget)}
                   >
                     <span className="truncate">{model.label}</span>
                     {isImageGenerationModel(model) && (
                       <span className="shrink-0 rounded-sm border border-accent/30 px-1 text-[9px] text-accent">
-                        生图
+                        {t.modelList.imageBadge}
                       </span>
                     )}
                   </button>
                   <div className="truncate font-mono text-[9.5px] text-fg-faint">
-                    {MODEL_CATALOG[model.provider].label} · {model.version}
+                    {t.providers[model.provider].label} · {model.version}
                   </div>
                 </div>
 
                 {/* 激活开关 */}
                 <label
                   className="relative h-[19px] w-[34px] shrink-0 cursor-pointer"
-                  title={isActive ? '点击关闭' : '点击开启'}
+                  title={isActive ? t.modelList.turnOff : t.modelList.turnOn}
                 >
                   <input
                     type="checkbox"
@@ -108,7 +109,7 @@ export function ModelListSection({ onAddModel, onShowInfo }: Props) {
                 <button
                   type="button"
                   className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-fg-faint transition-colors hover:bg-danger-bg hover:text-danger-fg"
-                  title="移除此模型"
+                  title={t.modelList.remove}
                   onClick={() => removeModel(model.id)}
                 >
                   <X className="h-3 w-3" />
@@ -125,7 +126,7 @@ export function ModelListSection({ onAddModel, onShowInfo }: Props) {
         className="flex w-full items-center justify-center gap-1.5 rounded-md border border-accent/25 bg-accent/10 px-3 py-2 text-[11.5px] font-semibold text-accent transition-colors hover:bg-accent/15"
       >
         <Plus className="h-3.5 w-3.5" />
-        添加新模型
+        {t.modelList.addNew}
       </button>
     </div>
   )

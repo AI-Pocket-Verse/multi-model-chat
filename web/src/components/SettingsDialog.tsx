@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { PROVIDER_KEYS } from '@multi-model-chat/shared'
 import { KeyRound, Pencil, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
 
+import { useT } from '../i18n'
 import type { ModelConfig } from '../lib/catalog'
 import { MODEL_CATALOG } from '../lib/catalog'
 import { useAiModelStore } from '../stores/aiModel'
@@ -20,6 +21,7 @@ interface Props {
  * 开关与删除仍在左侧栏，这里不重复。
  */
 export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
+  const t = useT()
   const models = useAiModelStore((s) => s.models)
   const activeModels = useAiModelStore((s) => s.activeModels)
   const providerStatus = useAiModelStore((s) => s.providerStatus)
@@ -45,10 +47,10 @@ export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
             <div>
               <Dialog.Title className="flex items-center gap-2 text-[15px] font-bold text-fg">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-accent" />
-                全局设置
+                {t.settings.title}
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-[11.5px] text-fg-faint">
-                查看服务端 Key 配置，编辑或切换各窗口使用的模型
+                {t.settings.description}
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
@@ -65,7 +67,7 @@ export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
             <section>
               <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-fg-muted">
                 <KeyRound className="h-3 w-3" />
-                服务端 Key
+                {t.settings.serverKeys}
               </div>
               {providerStatus ? (
                 <div className="grid grid-cols-2 gap-1.5">
@@ -77,13 +79,13 @@ export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
                         className="flex items-center gap-2 rounded-md border border-line bg-surface px-2.5 py-1.5 text-[11.5px] text-fg"
                       >
                         <span className="text-[13px]">{MODEL_CATALOG[key].icon}</span>
-                        <span className="min-w-0 flex-1 truncate">{MODEL_CATALOG[key].label}</span>
+                        <span className="min-w-0 flex-1 truncate">{t.providers[key].label}</span>
                         <span
                           className={`shrink-0 rounded-sm px-1.5 py-px text-[10px] ${
                             ok ? 'bg-success-bg text-success-fg' : 'bg-bg text-fg-faint'
                           }`}
                         >
-                          {ok ? '已配置' : '未配置'}
+                          {ok ? t.settings.configured : t.settings.notConfigured}
                         </span>
                       </div>
                     )
@@ -91,17 +93,17 @@ export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
                 </div>
               ) : (
                 <div className="rounded-md border border-line bg-surface px-3 py-2 text-[11.5px] text-fg-faint">
-                  暂时无法获取服务端配置，确认 api 已启动后重新打开本面板
+                  {t.settings.statusUnavailable}
                 </div>
               )}
               <div className="mt-1.5 text-[11px] leading-[1.6] text-fg-faint">
-                在 api/.env.dev（生产为 .env.prod）里配置，重启 api 生效；未配置的供应商可在模型里自带 Key。
+                {t.settings.keysHint}
               </div>
             </section>
 
             <section className="min-h-0">
               <div className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-fg-muted">
-                模型（{models.length}）
+                {t.settings.models(models.length)}
               </div>
               <div className="flex flex-col gap-1.5">
                 {models.map((model) => (
@@ -115,27 +117,27 @@ export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
                         <span className="truncate">{model.label}</span>
                         {activeModels.has(model.id) && (
                           <span className="shrink-0 rounded-sm border border-accent/30 px-1 text-[9px] text-accent">
-                            已激活
+                            {t.settings.active}
                           </span>
                         )}
                         {model.apiKey && (
                           <span className="shrink-0 rounded-sm border border-line px-1 text-[9px] text-fg-faint">
-                            自带 Key
+                            {t.settings.ownKey}
                           </span>
                         )}
                       </div>
                       <div className="truncate font-mono text-[9.5px] text-fg-faint">
-                        {MODEL_CATALOG[model.provider].label} · {model.version}
+                        {t.providers[model.provider].label} · {model.version}
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => onEditModel(model)}
-                      title="编辑此模型"
+                      title={t.settings.editModel}
                       className="flex h-6 shrink-0 items-center gap-1 rounded-sm px-1.5 text-[11px] text-fg-faint transition-colors hover:bg-nav-active-bg hover:text-accent"
                     >
                       <Pencil className="h-3 w-3" />
-                      编辑
+                      {t.settings.edit}
                     </button>
                   </div>
                 ))}
@@ -155,7 +157,7 @@ export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
                 setConfirmReset(false)
               }}
               onBlur={() => setConfirmReset(false)}
-              title="恢复为预置的模型列表：自己添加的模型及其对话会被删除，预置模型的对话保留"
+              title={t.settings.resetTitle}
               className={`flex items-center gap-1.5 rounded-md border px-3 py-2 text-[12px] transition-colors ${
                 confirmReset
                   ? 'border-danger-line bg-danger-bg text-danger-fg'
@@ -163,14 +165,14 @@ export function SettingsDialog({ open, onOpenChange, onEditModel }: Props) {
               }`}
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              {confirmReset ? '再点一次确认恢复' : '恢复预置模型列表'}
+              {confirmReset ? t.settings.resetConfirm : t.settings.reset}
             </button>
             <Dialog.Close asChild>
               <button
                 type="button"
                 className="rounded-md bg-accent px-4 py-2 text-[12px] font-semibold text-accent-fg transition-colors hover:bg-accent/90"
               >
-                完成
+                {t.settings.done}
               </button>
             </Dialog.Close>
           </div>

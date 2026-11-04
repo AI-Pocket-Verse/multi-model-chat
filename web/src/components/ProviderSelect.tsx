@@ -4,6 +4,7 @@ import type { ProviderKey } from '@multi-model-chat/shared'
 import { PROVIDER_KEYS } from '@multi-model-chat/shared'
 import { Check, ChevronDown } from 'lucide-react'
 
+import { useT } from '../i18n'
 import { MODEL_CATALOG } from '../lib/catalog'
 
 /**
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function ProviderSelect({ value, onChange }: Props) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -52,7 +54,7 @@ export function ProviderSelect({ value, onChange }: Props) {
         className="flex w-full items-center gap-2 rounded-md border border-line bg-bg px-3 py-2.5 text-[12.5px] text-fg outline-none transition-colors hover:border-accent focus:border-accent"
       >
         <span className="text-[14px]">{current.icon}</span>
-        <span className="flex-1 text-left">{current.label}</span>
+        <span className="flex-1 text-left">{t.providers[value].label}</span>
         <ChevronDown
           className={`h-4 w-4 text-fg-faint transition-transform ${open ? 'rotate-180' : ''}`}
         />
@@ -81,7 +83,7 @@ export function ProviderSelect({ value, onChange }: Props) {
                   }`}
                 >
                   <span className="text-[14px]">{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
+                  <span className="flex-1">{t.providers[key].label}</span>
                   {selected && <Check className="h-3.5 w-3.5" />}
                 </button>
               </li>

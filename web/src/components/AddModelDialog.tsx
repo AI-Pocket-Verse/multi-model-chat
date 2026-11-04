@@ -4,6 +4,8 @@ import { type ReactNode, useEffect, useState } from 'react'
 import type { ProviderKey } from '@multi-model-chat/shared'
 import { Eye, EyeOff, Info, Pencil, Plus, ShieldCheck, X } from 'lucide-react'
 
+import type { Lang } from '../i18n'
+import { useLangStore, useT } from '../i18n'
 import type { ModelConfig } from '../lib/catalog'
 import { MODEL_CATALOG } from '../lib/catalog'
 import { showToast } from '../lib/toast'
@@ -16,66 +18,129 @@ const A = (props: { href: string; children: ReactNode }) => (
   </a>
 )
 
-/** 各供应商的输入提示 */
-const HINTS: Record<ProviderKey, { placeholder: string; hint: ReactNode }> = {
-  volcengine: {
-    placeholder: 'doubao-seed-2.0-pro、doubao-seedream-4-5-251128 或 ep-XXXXXXXX-XXXX',
-    hint: (
-      <>
-        可填模型名称，或在
-        <A href="https://ark.volcengine.com/endpoint">控制台→推理接入点</A>
-        创建后填入 ep-xxx-xxx；doubao-seedream-* 可直接生图
-      </>
-    ),
+/** 各供应商的输入提示（含外链，所以按语言写成 JSX，不进 i18n 字典） */
+const HINTS: Record<Lang, Record<ProviderKey, { placeholder: string; hint: ReactNode }>> = {
+  zh: {
+    volcengine: {
+      placeholder: 'doubao-seed-2.0-pro、doubao-seedream-4-5-251128 或 ep-XXXXXXXX-XXXX',
+      hint: (
+        <>
+          可填模型名称，或在
+          <A href="https://ark.volcengine.com/endpoint">控制台→推理接入点</A>
+          创建后填入 ep-xxx-xxx；doubao-seedream-* 可直接生图
+        </>
+      ),
+    },
+    qwen: {
+      placeholder: 'qwen3.5-plus、qwen-image-2.0-pro 等',
+      hint: (
+        <>
+          填写模型名称，可在<A href="https://bailian.console.aliyun.com/">百炼控制台</A>
+          查看已开通模型；qwen-image-* 可直接生图
+        </>
+      ),
+    },
+    deepseek: {
+      placeholder: 'deepseek-chat 或 deepseek-reasoner',
+      hint: (
+        <>
+          模型仅支持 deepseek-chat（通用）和 deepseek-reasoner（推理），详见
+          <A href="https://api-docs.deepseek.com/zh-cn/">API 文档</A>
+        </>
+      ),
+    },
+    zhipu: {
+      placeholder: 'glm-5、glm-image、glm-4.7、glm-4.6v',
+      hint: (
+        <>
+          填写模型名称，详见<A href="https://docs.bigmodel.cn/">智谱 AI 文档</A>；glm-image / CogView
+          可直接生图
+        </>
+      ),
+    },
+    kimi: {
+      placeholder: 'kimi-k2.5、moonshot-v1-8k、moonshot-v1-128k',
+      hint: (
+        <>
+          填写模型名称，详见<A href="https://platform.moonshot.cn/docs/api/chat">Kimi API 文档</A>，在
+          <A href="https://platform.moonshot.cn/">开发者平台</A>管理 API Key
+        </>
+      ),
+    },
+    minimax: {
+      placeholder: 'MiniMax-M2.7、image-01、M2-her',
+      hint: (
+        <>
+          注意模型 ID 大小写，详见<A href="https://platform.minimaxi.com/docs">MiniMax 文档</A>
+          ；image-01 可直接生图
+        </>
+      ),
+    },
+    custom: {
+      placeholder: 'gpt-4o-mini、gpt-image-1、llama3.2 等',
+      hint: <>填写该接口实际提供的模型名称；gpt-image / dall-e 可直接生图</>,
+    },
   },
-  qwen: {
-    placeholder: 'qwen3.5-plus、qwen-image-2.0-pro 等',
-    hint: (
-      <>
-        填写模型名称，可在<A href="https://bailian.console.aliyun.com/">百炼控制台</A>
-        查看已开通模型；qwen-image-* 可直接生图
-      </>
-    ),
-  },
-  deepseek: {
-    placeholder: 'deepseek-chat 或 deepseek-reasoner',
-    hint: (
-      <>
-        模型仅支持 deepseek-chat（通用）和 deepseek-reasoner（推理），详见
-        <A href="https://api-docs.deepseek.com/zh-cn/">API 文档</A>
-      </>
-    ),
-  },
-  zhipu: {
-    placeholder: 'glm-5、glm-image、glm-4.7、glm-4.6v',
-    hint: (
-      <>
-        填写模型名称，详见<A href="https://docs.bigmodel.cn/">智谱 AI 文档</A>；glm-image / CogView
-        可直接生图
-      </>
-    ),
-  },
-  kimi: {
-    placeholder: 'kimi-k2.5、moonshot-v1-8k、moonshot-v1-128k',
-    hint: (
-      <>
-        填写模型名称，详见<A href="https://platform.moonshot.cn/docs/api/chat">Kimi API 文档</A>，在
-        <A href="https://platform.moonshot.cn/">开发者平台</A>管理 API Key
-      </>
-    ),
-  },
-  minimax: {
-    placeholder: 'MiniMax-M2.7、image-01、M2-her',
-    hint: (
-      <>
-        注意模型 ID 大小写，详见<A href="https://platform.minimaxi.com/docs">MiniMax 文档</A>
-        ；image-01 可直接生图
-      </>
-    ),
-  },
-  custom: {
-    placeholder: 'gpt-4o-mini、gpt-image-1、llama3.2 等',
-    hint: <>填写该接口实际提供的模型名称；gpt-image / dall-e 可直接生图</>,
+  en: {
+    volcengine: {
+      placeholder: 'doubao-seed-2.0-pro, doubao-seedream-4-5-251128 or ep-XXXXXXXX-XXXX',
+      hint: (
+        <>
+          Enter a model name, or create an endpoint under{' '}
+          <A href="https://ark.volcengine.com/endpoint">Console → Endpoints</A> and enter its ep-xxx-xxx ID;
+          doubao-seedream-* can generate images
+        </>
+      ),
+    },
+    qwen: {
+      placeholder: 'qwen3.5-plus, qwen-image-2.0-pro, …',
+      hint: (
+        <>
+          Enter a model name; see enabled models in the{' '}
+          <A href="https://bailian.console.aliyun.com/">Model Studio console</A>. qwen-image-* can generate images
+        </>
+      ),
+    },
+    deepseek: {
+      placeholder: 'deepseek-chat or deepseek-reasoner',
+      hint: (
+        <>
+          Only deepseek-chat (general) and deepseek-reasoner (reasoning) are available; see the{' '}
+          <A href="https://api-docs.deepseek.com/">API docs</A>
+        </>
+      ),
+    },
+    zhipu: {
+      placeholder: 'glm-5, glm-image, glm-4.7, glm-4.6v',
+      hint: (
+        <>
+          Enter a model name; see the <A href="https://docs.bigmodel.cn/">Zhipu AI docs</A>. glm-image / CogView can
+          generate images
+        </>
+      ),
+    },
+    kimi: {
+      placeholder: 'kimi-k2.5, moonshot-v1-8k, moonshot-v1-128k',
+      hint: (
+        <>
+          Enter a model name; see the <A href="https://platform.moonshot.cn/docs/api/chat">Kimi API docs</A>, and manage
+          keys on the <A href="https://platform.moonshot.cn/">developer platform</A>
+        </>
+      ),
+    },
+    minimax: {
+      placeholder: 'MiniMax-M2.7, image-01, M2-her',
+      hint: (
+        <>
+          Model IDs are case-sensitive; see the <A href="https://platform.minimaxi.com/docs">MiniMax docs</A>. image-01
+          can generate images
+        </>
+      ),
+    },
+    custom: {
+      placeholder: 'gpt-4o-mini, gpt-image-1, llama3.2, …',
+      hint: <>Enter a model name the API actually serves; gpt-image / dall-e can generate images</>,
+    },
   },
 }
 
@@ -91,6 +156,9 @@ interface Props {
 
 /** 添加 / 编辑模型共用一个弹窗：字段与校验完全相同，只有标题和确认动作不同 */
 export function AddModelDialog({ open, onOpenChange, editing }: Props) {
+  const t = useT()
+  const lang = useLangStore((s) => s.lang)
+  const hints = HINTS[lang]
   const addModel = useAiModelStore((s) => s.addModel)
   const updateModel = useAiModelStore((s) => s.updateModel)
   const providerStatus = useAiModelStore((s) => s.providerStatus)
@@ -140,16 +208,16 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
   const confirm = () => {
     const v = version.trim()
     if (!v) {
-      showToast('请填写模型 ID 或接入点 ID')
+      showToast(t.dialog.needModelId)
       return
     }
     const url = isCustom ? baseUrl.trim() : ''
     if (url && !/^https?:\/\/[^/\s]+/i.test(url)) {
-      showToast('Base URL 需以 http:// 或 https:// 开头')
+      showToast(t.dialog.badBaseUrl)
       return
     }
     if (isCustom && !url && providerStatus && !providerStatus.configured.custom) {
-      showToast('服务端未配置 CUSTOM_BASE_URL，请填写 Base URL')
+      showToast(t.dialog.needBaseUrl)
       return
     }
 
@@ -166,7 +234,7 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
         // 换了供应商才跟着换主题色，否则保留原色（预置模型各有自己的颜色）
         color: provider === editing.provider ? editing.color : catalog.color,
       })
-      showToast(`已保存「${fields.label}」`)
+      showToast(t.dialog.saved(fields.label))
     } else {
       addModel({ id: `${provider}_${Date.now()}`, color: catalog.color, active: true, ...fields })
     }
@@ -175,10 +243,10 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
   }
 
   const keyHint = isCustom
-    ? '留空则使用服务端 CUSTOM_API_KEY；自填 Base URL 时只会使用这里填的 Key（本地 Ollama 等可留空）'
+    ? t.dialog.keyHintCustom
     : serverConfigured === false
-      ? '服务端未配置该供应商的 Key，请在这里填写；仅保存在本地浏览器'
-      : '留空则使用服务端配置的 Key；填写后仅保存在本地浏览器'
+      ? t.dialog.keyHintMissing
+      : t.dialog.keyHintDefault
 
   return (
     <Dialog.Root
@@ -199,12 +267,10 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
                 ) : (
                   <Plus className="h-3.5 w-3.5 text-accent" />
                 )}
-                {editing ? '编辑模型' : '添加 AI 模型'}
+                {editing ? t.dialog.editTitle : t.dialog.addTitle}
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-[11.5px] text-fg-faint">
-                {editing
-                  ? '修改供应商、模型 ID、显示名称或 API Key，对话历史保留'
-                  : '配置新的对话窗口，支持主流大模型服务商'}
+                {editing ? t.dialog.editDescription : t.dialog.addDescription}
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
@@ -220,20 +286,20 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
           <div className="flex flex-col gap-3.5">
             <div>
               <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.06em] text-fg-muted">
-                模型提供商
+                {t.dialog.provider}
               </label>
               <ProviderSelect value={provider} onChange={changeProvider} />
             </div>
 
             <div>
               <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.06em] text-fg-muted">
-                模型 ID / 接入点 ID
+                {t.dialog.modelId}
               </label>
               {/* datalist 只是输入补全提示（仍可自由输入），不是规则 2 所指的原生弹层选择器 */}
               <input
                 type="text"
                 className={INPUT_CLASS}
-                placeholder={HINTS[provider].placeholder}
+                placeholder={hints[provider].placeholder}
                 list="model-version-list"
                 autoComplete="off"
                 spellCheck={false}
@@ -247,18 +313,18 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
               </datalist>
               <div className="mt-1.5 flex items-start gap-1.5 text-[11px] text-fg-faint">
                 <Info className="mt-px h-3 w-3 shrink-0 text-accent" />
-                <span>{HINTS[provider].hint}</span>
+                <span>{hints[provider].hint}</span>
               </div>
             </div>
 
             <div>
               <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.06em] text-fg-muted">
-                显示名称 <span className="font-normal normal-case tracking-normal">（可选）</span>
+                {t.dialog.displayName} <span className="font-normal normal-case tracking-normal">{t.dialog.optional}</span>
               </label>
               <input
                 type="text"
                 className={INPUT_CLASS}
-                placeholder="留空则使用默认名称"
+                placeholder={t.dialog.displayNamePlaceholder}
                 maxLength={30}
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
@@ -270,7 +336,7 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
                 <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.06em] text-fg-muted">
                   Base URL{' '}
                   <span className="font-normal normal-case tracking-normal">
-                    {providerStatus?.configured.custom ? '（可选）' : ''}
+                    {providerStatus?.configured.custom ? t.dialog.optional : ''}
                   </span>
                 </label>
                 <input
@@ -278,8 +344,8 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
                   className={INPUT_CLASS}
                   placeholder={
                     providerStatus?.configured.custom
-                      ? '留空则使用服务端 CUSTOM_BASE_URL'
-                      : 'https://api.openai.com/v1 或 http://127.0.0.1:11434/v1'
+                      ? t.dialog.baseUrlPlaceholderServer
+                      : t.dialog.baseUrlPlaceholder
                   }
                   autoComplete="off"
                   spellCheck={false}
@@ -291,8 +357,8 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
                   <Info className="mt-px h-3 w-3 shrink-0 text-accent" />
                   <span>
                     {providerStatus?.allowUserBaseUrl === false
-                      ? '服务端已禁止自填接口地址，将使用管理员配置的 CUSTOM_BASE_URL'
-                      : '填到 /v1 一级；请求由 api 发出，地址需能从 api 所在机器访问'}
+                      ? t.dialog.baseUrlForbidden
+                      : t.dialog.baseUrlHint}
                   </span>
                 </div>
               </div>
@@ -314,7 +380,7 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
                 <button
                   type="button"
                   onClick={() => setShowKey((v) => !v)}
-                  title="显示/隐藏"
+                  title={t.dialog.showHide}
                   className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-sm text-fg-faint transition-colors hover:text-accent"
                 >
                   {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -328,7 +394,7 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
 
             <div className="rounded-md border border-info-line bg-info-bg px-3 py-2.5 text-[11px] leading-[1.7] text-fg-muted">
               <Info className="mr-1.5 inline h-3 w-3 text-accent" />
-              {catalog.info}
+              {t.providers[provider].info}
             </div>
           </div>
 
@@ -338,7 +404,7 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
                 type="button"
                 className="rounded-md border border-line bg-surface px-4 py-2 text-[12px] text-fg-muted transition-colors hover:bg-nav-active-bg"
               >
-                取消
+                {t.dialog.cancel}
               </button>
             </Dialog.Close>
             <button
@@ -347,7 +413,7 @@ export function AddModelDialog({ open, onOpenChange, editing }: Props) {
               className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-[12px] font-semibold text-accent-fg transition-colors hover:bg-accent/90"
             >
               {editing ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-              {editing ? '保存' : '添加模型'}
+              {editing ? t.dialog.save : t.dialog.add}
             </button>
           </div>
         </Dialog.Content>
