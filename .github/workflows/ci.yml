@@ -18,3 +18,21 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+  # 构建 Docker 镜像并冒烟测试（只构建，不推送）
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker build -t multi-model-chat:ci .
+      - name: Smoke test
+        run: |
+          docker run -d --name mmc -p 127.0.0.1:4060:4060 multi-model-chat:ci
+          for i in $(seq 1 30); do curl -fs http://localhost:4060/healthz && break; sleep 1; done
+          curl -fs http://localhost:4060/healthz
+          curl -fs http://localhost:4060/ | grep -q '<div id="root">'
+          curl -fs http://localhost:4060/some/spa/route | grep -q '<div id="root">'
+          curl -fs http://localhost:4060/api/providers
+      - if: failure()
+        run: docker logs mmc
