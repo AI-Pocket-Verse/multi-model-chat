@@ -1,0 +1,5 @@
+{
+  "extends": "@multi-model-chat/tsconfig/api.json",
+  "include": ["src"],
+  "compilerOptions": { "noEmit": true }
+}

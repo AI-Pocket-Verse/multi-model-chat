@@ -1,0 +1,41 @@
+{
+  "name": "@multi-model-chat/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@multi-model-chat/auth-client-web": "workspace:*",
+    "@multi-model-chat/design-tokens": "workspace:*",
+    "@multi-model-chat/http-client": "workspace:*",
+    "@multi-model-chat/shared": "workspace:*",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "lucide-react": "0.408.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zustand": "4.5.4"
+  },
+  "devDependencies": {
+    "@multi-model-chat/tailwind-preset": "workspace:*",
+    "@multi-model-chat/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "4.7.0",
+    "autoprefixer": "^10.4.19",
+    "jsdom": "^24.1.1",
+    "postcss": "^8.4.39",
+    "tailwindcss": "3.4.7",
+    "typescript": "5.4.5",
+    "vite": "6.4.5",
+    "vitest": "4.1.12"
+  }
+}

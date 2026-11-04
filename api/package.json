@@ -1,0 +1,31 @@
+{
+  "name": "@multi-model-chat/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env.dev src/index.ts",
+    "build": "tsc",
+    "start": "node --import tsx --env-file=.env.prod dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.0",
+    "@fastify/rate-limit": "^11.0.0",
+    "@fastify/static": "10.1.6",
+    "@multi-model-chat/api-kit": "workspace:*",
+    "@multi-model-chat/auth-client-api": "workspace:*",
+    "@multi-model-chat/shared": "workspace:*",
+    "fastify": "5.12.7",
+    "tsx": "^4.16.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@multi-model-chat/tsconfig": "workspace:*",
+    "@types/node": "^20.14.10",
+    "typescript": "5.4.5",
+    "vitest": "4.1.12"
+  }
+}

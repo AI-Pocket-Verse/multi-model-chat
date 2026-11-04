@@ -1,0 +1,25 @@
+# docker compose up -d --build   →   http://localhost:4060
+#
+# Keys: copy api/.env.example to api/.env.docker and fill in at least one
+# provider key (optional — models can also carry their own key in the UI).
+services:
+  multi-model-chat:
+    build: .
+    image: multi-model-chat:local
+    env_file:
+      - path: api/.env.docker
+        required: false
+    environment:
+      # Must listen on all interfaces inside the container; the port mapping
+      # below still only exposes it on the host's 127.0.0.1.
+      HOST: 0.0.0.0
+      NODE_ENV: production
+    ports:
+      # Local mode has no login. Keep 127.0.0.1 unless you enable login
+      # (WHOAMI_URL), or anyone on your network can spend your API keys.
+      - "127.0.0.1:4060:4060"
+    extra_hosts:
+      # Lets custom models reach services on the host, e.g. Ollama at
+      # http://host.docker.internal:11434/v1 (works on Linux too).
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

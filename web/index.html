@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>多模型 AI 并行对话</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <script>
+      // 首屏皮肤：必须在 CSS 之前跑，否则会先用默认皮肤渲染再跳到用户选的那套（闪一下）。
+      // key 必须与 @multi-model-chat/design-tokens 的 SKIN_STORAGE_KEY 一致。
+      try {
+        document.documentElement.dataset.skin = localStorage.getItem('multi-model-chat.skin') || 'a'
+      } catch (e) {
+        document.documentElement.dataset.skin = 'a'
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

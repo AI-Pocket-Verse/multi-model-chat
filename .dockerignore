@@ -1,0 +1,15 @@
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!api/.env.example
+.git
+.github
+.private
+.tmp
+docs
+coverage
+AGENTS.md
+CLAUDE.md
+ROADMAP.md

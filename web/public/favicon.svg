@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 三个并排的圆角窗口（与顶栏左侧图标同款），代表「多模型并行对话」。
+       顶栏那版是描边，favicon 用实心，避免 16px 下糊成一团。 -->
+  <rect x="2" y="5" width="8" height="22" rx="3" fill="#3b82f6"/>
+  <rect x="12" y="9" width="8" height="18" rx="3" fill="#3b82f6" opacity="0.7"/>
+  <rect x="22" y="5" width="8" height="22" rx="3" fill="#3b82f6"/>
+</svg>

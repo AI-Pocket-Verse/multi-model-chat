@@ -1,0 +1,240 @@
+/**
+ * 皮肤 token 必须在 @tailwind 之前引入 —— 它们定义的是 CSS 变量,
+ * Tailwind 生成的规则(rgb(var(--accent) / …))在运行时读取这些变量。
+ *
+ * 【2026-07-31 全量归一】此前这里有一套 am- 前缀的自有视觉(自有蓝 #3b82f6、
+ * Orbitron/Exo 2 科幻字体、光晕网格背景装饰)。按「产品不许有自己的主色」(规则 9)
+ * 已全部映射到共享 token;其中 --accent / --shadow-* 与皮肤系统【同名不同格式】
+ * (hex vs RGB 通道)是必须先解掉的硬冲突 —— 同名时谁后加载谁赢,
+ * bg-accent 会解析成 rgb(#3b82f6 / 1) 直接静默失效。
+ *
+ * 下面只保留【原子类表达不了、且与颜色无关】的部分:
+ * 布局常量、动画 keyframes、滚动条、流式呼吸灯、以及作用于
+ * renderMarkdown 动态 HTML 的富文本样式。
+ */
+@import '@multi-model-chat/design-tokens/structure.css';
+@import '@multi-model-chat/design-tokens/skins/a.css';
+@import '@multi-model-chat/design-tokens/skins/b.css';
+@import '@multi-model-chat/design-tokens/skins/c.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 布局常量(非颜色,保留)。tailwind.config 的 spacing 引用它们 */
+  --sidebar-w: 290px;
+  --header-h: 60px;
+  --inputbar-h: 80px;
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    /* 灰底白卡的层次:页面底 surface(灰),卡片 elevated(白)。字体走共享 font-sans */
+    @apply bg-surface font-sans text-fg;
+  }
+  #root {
+    height: 100%;
+  }
+}
+
+/* === 滚动条(Tailwind 无原生支持)=== */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--line));
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--accent));
+}
+
+/* === 动画 === */
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes typingBounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+@keyframes msgIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes avatarBreath {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px var(--stream-color, rgb(var(--accent))),
+      0 0 8px var(--stream-color, rgb(var(--accent)));
+    opacity: 1;
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px var(--stream-color, rgb(var(--accent))),
+      0 0 18px var(--stream-color, rgb(var(--accent)));
+    opacity: 0.85;
+  }
+}
+
+@keyframes mipIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 依赖动画的少量类 —— 用 @apply 表达不了 keyframes 绑定与 nth-child 延迟 */
+.anim-pulse-dot {
+  animation: pulseDot 2.4s ease-in-out infinite;
+}
+.anim-status-loading {
+  animation: pulseDot 0.9s ease-in-out infinite;
+}
+.anim-msg-in {
+  animation: msgIn 0.28s ease-out forwards;
+}
+.anim-mip-in {
+  animation: mipIn 0.18s ease;
+}
+
+/* 流式时头像呼吸灯:--stream-color 由 JS 按【模型主题色】写入。
+   模型品牌色是业务语义色(换皮肤不该变),所以不走皮肤 token;
+   fallback 跟共享 accent 走 —— 注意要写 rgb(var(--accent)),裸 var 是通道值不是颜色 */
+.anim-avatar-breath {
+  animation: avatarBreath 1.5s ease-in-out infinite;
+}
+
+.typing-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgb(var(--fg-faint));
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+/* 流式进行中的光标,流结束后由组件移除该类 */
+.stream-cursor::after {
+  content: '▊';
+  color: rgb(var(--accent));
+  animation: pulseDot 0.65s ease-in-out infinite;
+  font-size: 11px;
+}
+
+/* === Toast(lib/toast.ts 直接 appendChild 到 body,不走 React 树)===
+   中性深色浮层:bg-fg + text-bg 组合,与 resume 的 toast 同款,不跟品牌色 */
+.toast {
+  position: fixed;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgb(var(--fg));
+  color: rgb(var(--bg));
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  z-index: 999;
+  pointer-events: none;
+  animation: toastIn 0.3s ease-out;
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+}
+
+/* === Markdown 富文本 ===
+   作用于 renderMarkdown() 生成的 HTML 字符串,没法给动态内容套原子类 */
+.msg-content {
+  line-height: 1.65;
+}
+.md-code {
+  background: rgb(var(--accent) / 0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: theme('fontFamily.mono');
+  font-size: 11px;
+}
+.md-h1,
+.md-h2,
+.md-h3 {
+  font-weight: 700;
+  margin: 8px 0 4px;
+  color: rgb(var(--fg));
+}
+.md-h1 {
+  font-size: 14px;
+}
+.md-h2 {
+  font-size: 13px;
+}
+.md-h3 {
+  font-size: 12px;
+}
+.md-li {
+  margin: 2px 0;
+  padding-left: 4px;
+}
+.md-li-num {
+  color: rgb(var(--accent));
+  font-weight: 600;
+  margin-right: 6px;
+}
+.md-li-dot {
+  color: rgb(var(--accent));
+  margin-right: 6px;
+}

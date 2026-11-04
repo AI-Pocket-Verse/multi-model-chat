@@ -1,0 +1,30 @@
+server {
+    listen 80;
+    server_name __SERVER_NAME__;
+
+    # Static frontend (built artifact)
+    root __INSTALL_DIR__/web/dist;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:4060;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $remote_addr;  # overwrite, not append: clients must not be able to forge XFF
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Chat replies are SSE streams: no buffering, or the typing effect is
+        # lost. Image generation can take minutes (the api caps it at 300 s).
+        proxy_buffering off;
+        proxy_read_timeout 330s;
+    }
+
+    # SPA fallback
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    access_log /var/log/nginx/multi-model-chat.access.log;
+    error_log  /var/log/nginx/multi-model-chat.error.log;
+}

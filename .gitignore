@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+*.tsbuildinfo
+coverage/
+
+# Env — only the .example template is committed
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Private notes, scratch files, local AI tool config
+.private/
+.tmp/
+.playwright-mcp/
+
+# Maintainer-only docs and AI agent instructions (kept locally, not published)
+AGENTS.md
+CLAUDE.md
+ROADMAP.md
+goals/
+process/
+.claude/
+.codex/
+.cursor/
+.agents/
